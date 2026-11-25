@@ -2,10 +2,66 @@
 
 import React, { useState } from 'react';
 
+// Bloque de traducción a lenguaje claro (solo se muestra si "visible" es true)
+function Traduccion({ visible, children }) {
+  if (!visible) return null;
+  return (
+    <div style={styles.traduccion}>
+      <span style={styles.traduccionLabel}>🗣️ En claro:</span> {children}
+    </div>
+  );
+}
+
+const glosario = [
+  {
+    icono: '🕯️',
+    termino: 'Vela (candlestick)',
+    simple:
+      'Cada vela resume lo que hizo el precio en un periodo (por ejemplo, 1 hora). Si es verde, el precio cerró más arriba de donde abrió; si es roja, cerró más abajo. Las líneas finas ("mechas") muestran hasta dónde llegó el precio antes de devolverse.',
+  },
+  {
+    icono: '🧱',
+    termino: 'Soporte',
+    simple:
+      'Es un "piso": una zona de precio donde históricamente los compradores aparecen y el precio suele rebotar. Si el piso se rompe, el precio puede seguir cayendo.',
+  },
+  {
+    icono: '🚧',
+    termino: 'Resistencia',
+    simple:
+      'Es un "techo": una zona donde los vendedores suelen frenar las subidas. Si el precio lo supera con fuerza, puede abrirse camino hacia arriba.',
+  },
+  {
+    icono: '🧭',
+    termino: 'Tendencia',
+    simple:
+      'Es la dirección general del precio. Alcista = va subiendo con máximos más altos; bajista = va cayendo; lateral = se mueve en un pasillo sin rumbo claro.',
+  },
+  {
+    icono: '🌡️',
+    termino: 'RSI(14)',
+    simple:
+      'Es un "termómetro" de 0 a 100 que mide qué tan acelerado va el precio. Arriba de 70 = muy caliente (puede enfriarse); debajo de 30 = muy golpeado (puede rebotar); cerca de 50 = equilibrio.',
+  },
+  {
+    icono: '📊',
+    termino: 'Volumen',
+    simple:
+      'Cuánta gente está comprando y vendiendo. Una subida con mucho volumen tiene más respaldo que una con poco.',
+  },
+  {
+    icono: '〰️',
+    termino: 'Media móvil (MA20)',
+    simple:
+      'Es el precio promedio de los últimos 20 periodos, dibujado como una línea suave. Si el precio está por encima, suele indicar fuerza; por debajo, debilidad.',
+  },
+];
+
 export default function Home() {
   const [canal, setCanal] = useState('correo');
   const [contacto, setContacto] = useState('');
   const [estado, setEstado] = useState('idle'); // idle | loading | success | error
+  const [modoSimple, setModoSimple] = useState(false);
 
   const FORMSPREE_URL = 'https://formspree.io/f/mnpdlyne';
 
@@ -123,6 +179,41 @@ export default function Home() {
             Así luce exactamente un reporte diario de Radar30s en tu pantalla.
           </p>
 
+          {/* Botón traductor */}
+          <div style={styles.translateWrap}>
+            <button
+              type="button"
+              onClick={() => setModoSimple((v) => !v)}
+              aria-pressed={modoSimple}
+              style={modoSimple ? styles.translateBtnActive : styles.translateBtn}
+            >
+              {modoSimple ? '📊 Ver versión técnica' : '🧠 Traducir a lenguaje claro'}
+            </button>
+            <p style={styles.translateHint}>
+              {modoSimple
+                ? 'Mostrando explicaciones simples de velas, soportes y tendencias.'
+                : '¿No dominas el análisis técnico? Te explicamos velas, soportes y tendencias en palabras simples.'}
+            </p>
+          </div>
+
+          {/* Glosario (solo en modo claro) */}
+          {modoSimple && (
+            <div style={styles.glossaryBox}>
+              <h3 style={styles.glossaryTitle}>📖 Mini glosario para entender el reporte</h3>
+              <div style={styles.glossaryGrid}>
+                {glosario.map((g) => (
+                  <div key={g.termino} style={styles.glossaryItem}>
+                    <div style={styles.glossaryTerm}>
+                      <span style={{ marginRight: 8 }}>{g.icono}</span>
+                      {g.termino}
+                    </div>
+                    <p style={styles.glossaryText}>{g.simple}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div style={styles.grid2}>
             {/* Ejemplo 1 */}
             <div style={styles.reportCard}>
@@ -151,12 +242,23 @@ export default function Home() {
                 <p style={styles.reportPanorama}>
                   <strong>Panorama:</strong> Momentum alcista de corto plazo con expansión de volumen; vigilar zonas de sobrecompra antes de entradas tardías.
                 </p>
+                <Traduccion visible={modoSimple}>
+                  El precio viene subiendo con fuerza y mucha gente está operando. Pero cuando algo sube tan rápido puede "cansarse" y devolverse, así que entrar tarde es riesgoso.
+                </Traduccion>
+
                 <div style={styles.tickerBox}>
                   <strong>BTCUSDT:</strong> Sobre MA20 con <strong>RSI(14) en 68</strong> y volumen 24h <strong>+34%</strong>; resistencia en máximo intradía.
                 </div>
+                <Traduccion visible={modoSimple}>
+                  Bitcoin está por encima de su precio promedio reciente (buena señal de tendencia). El termómetro RSI marca 68: está caliente, cerca de la zona de euforia (70+). Se negoció 34% más de lo normal, así que el interés es real. Cerca del máximo del día hay un "techo" donde el precio podría frenarse.
+                </Traduccion>
+
                 <div style={styles.tickerBox}>
                   <strong>SOLUSDT:</strong> Impulso fuerte con <strong>RSI(14) en 74</strong> y volumen 24h <strong>+62%</strong>; riesgo de retroceso si pierde soporte inmediato.
                 </div>
+                <Traduccion visible={modoSimple}>
+                  Solana va muy acelerada, como un auto a toda velocidad: el RSI en 74 indica sobrecalentamiento y puede venir un freno. Hay 62% más de actividad de lo normal. Si el precio rompe el "piso" (soporte) más cercano, la caída podría extenderse.
+                </Traduccion>
               </div>
             </div>
 
@@ -187,18 +289,39 @@ export default function Home() {
                 <p style={styles.reportPanorama}>
                   <strong>Panorama:</strong> Escenario mixto con activos en tendencia y otros en rango lateral; RSI(14) filtra continuación sana de agotamiento.
                 </p>
+                <Traduccion visible={modoSimple}>
+                  Hoy no todo se mueve igual: algunos activos suben con rumbo claro y otros están "dormidos" sin dirección. El RSI ayuda a distinguir si una subida todavía tiene fuerza sana o ya se agotó.
+                </Traduccion>
+
                 <div style={styles.tickerBox}>
                   <strong>NVDA:</strong> Estructura alcista con <strong>RSI(14) en 64</strong> y volumen relativo alto; vigilar reacción en soporte de sesión.
                 </div>
+                <Traduccion visible={modoSimple}>
+                  NVIDIA está en tendencia de subida. RSI en 64 significa buena fuerza sin llegar a la euforia. Mucho volumen = mucha gente participando. Lo clave: ver si el precio aguanta cuando baja a su "piso" del día.
+                </Traduccion>
+
                 <div style={styles.tickerBox}>
                   <strong>AAPL:</strong> Rango lateral estrecho con <strong>RSI(14) en 49</strong>; neutral hasta romper extremos.
                 </div>
+                <Traduccion visible={modoSimple}>
+                  Apple se mueve en un "pasillo" angosto sin ir ni arriba ni abajo. RSI en 49 = equilibrio entre compradores y vendedores. No hay señal clara hasta que el precio salga del pasillo por arriba o por abajo.
+                </Traduccion>
+
                 <div style={styles.tickerBox}>
                   <strong>ETHUSDT:</strong> Rebote técnico cerca de soporte con <strong>RSI(14) en 31</strong> y volumen <strong>+21%</strong>.
                 </div>
+                <Traduccion visible={modoSimple}>
+                  Ethereum cayó hasta una zona de "piso" (soporte) y rebotó. RSI en 31 indica que venía muy golpeado (cerca de zona de rebote). Hay 21% más de actividad. Ojo: un rebote no garantiza que la tendencia cambie.
+                </Traduccion>
               </div>
             </div>
           </div>
+
+          {modoSimple && (
+            <p style={styles.disclaimer}>
+              🎓 Las traducciones a lenguaje claro son explicaciones educativas para entender el formato del reporte.
+            </p>
+          )}
 
           <p style={styles.disclaimer}>
             * Los reportes mostrados son ejemplos ilustrativos del formato generado por IA y tienen fines exclusivamente informativos, no constituyen asesoría financiera.
@@ -536,6 +659,89 @@ const styles = {
     fontSize: '0.82rem',
     marginTop: '24px',
   },
+
+  /* --- Traductor a lenguaje claro --- */
+  translateWrap: {
+    textAlign: 'center',
+    marginBottom: '28px',
+  },
+  translateBtn: {
+    backgroundColor: '#10b981',
+    color: '#042f2e',
+    padding: '13px 26px',
+    borderRadius: '10px',
+    fontWeight: '800',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    boxShadow: '0 6px 18px rgba(16, 185, 129, 0.25)',
+  },
+  translateBtnActive: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    color: '#34d399',
+    padding: '13px 26px',
+    borderRadius: '10px',
+    fontWeight: '800',
+    border: '1px solid #10b981',
+    cursor: 'pointer',
+    fontSize: '1rem',
+  },
+  translateHint: {
+    color: '#94a3b8',
+    fontSize: '0.9rem',
+    marginTop: '10px',
+  },
+  traduccion: {
+    backgroundColor: 'rgba(251, 191, 36, 0.08)',
+    border: '1px dashed rgba(251, 191, 36, 0.45)',
+    color: '#fde68a',
+    padding: '10px 12px',
+    borderRadius: '8px',
+    fontSize: '0.86rem',
+    lineHeight: 1.5,
+    margin: '-2px 0 12px',
+  },
+  traduccionLabel: {
+    fontWeight: '800',
+    color: '#fbbf24',
+  },
+  glossaryBox: {
+    backgroundColor: '#090d16',
+    border: '1px solid #1e293b',
+    borderRadius: '16px',
+    padding: '24px',
+    marginBottom: '28px',
+  },
+  glossaryTitle: {
+    fontSize: '1.15rem',
+    fontWeight: '800',
+    marginBottom: '16px',
+    textAlign: 'center',
+  },
+  glossaryGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+    gap: '14px',
+  },
+  glossaryItem: {
+    backgroundColor: '#111827',
+    border: '1px solid #1e293b',
+    borderRadius: '12px',
+    padding: '14px 16px',
+  },
+  glossaryTerm: {
+    fontWeight: '700',
+    color: '#34d399',
+    marginBottom: '6px',
+    fontSize: '0.98rem',
+  },
+  glossaryText: {
+    color: '#cbd5e1',
+    fontSize: '0.88rem',
+    lineHeight: 1.5,
+    margin: 0,
+  },
+
   ctaSection: {
     padding: '64px 0',
   },
