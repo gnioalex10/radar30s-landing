@@ -7,7 +7,7 @@ export default function Home() {
   const [contacto, setContacto] = useState('');
   const [estado, setEstado] = useState('idle'); // idle | loading | success | error
 
-  const FORMSPREE_URL = https://formspree.io/f/mnpdlyne
+  const FORMSPREE_URL = 'https://formspree.io/f/mnpdlyne';
 
   const placeholders = {
     correo: 'tu@correo.com',
