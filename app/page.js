@@ -1,6 +1,50 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 
 export default function Home() {
+  const [canal, setCanal] = useState('correo');
+  const [contacto, setContacto] = useState('');
+  const [estado, setEstado] = useState('idle'); // idle | loading | success | error
+
+  const FORMSPREE_URL = https://formspree.io/f/mnpdlyne
+
+  const placeholders = {
+    correo: 'tu@correo.com',
+    whatsapp: '+52 646 123 4567',
+    telegram: '@tu_usuario',
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!contacto.trim()) return;
+
+    setEstado('loading');
+    try {
+      const res = await fetch(FORMSPREE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          canal,
+          contacto: contacto.trim(),
+          origen: 'Radar30s Landing',
+        }),
+      });
+
+      if (res.ok) {
+        setEstado('success');
+        setContacto('');
+      } else {
+        setEstado('error');
+      }
+    } catch {
+      setEstado('error');
+    }
+  };
+
   return (
     <div style={styles.page}>
       {/* Navbar */}
@@ -13,7 +57,7 @@ export default function Home() {
           <nav style={styles.navLinks}>
             <a href="#como-funciona" style={styles.navLink}>Cómo funciona</a>
             <a href="#ejemplos" style={styles.navLink}>Ejemplos reales</a>
-            <a href="#acceso" style={styles.navBtnSmall}>Probar gratis</a>
+            <a href="#acceso" style={styles.navBtnSmall}>Acceso anticipado</a>
           </nav>
         </div>
       </header>
@@ -29,8 +73,8 @@ export default function Home() {
             Radar30s analiza flujo de noticias, volumen anormal y lecturas técnicas (RSI, medias móviles y soportes) en cripto y acciones para entregarte un reporte directo al grano, sin humo.
           </p>
           <div style={styles.heroButtons}>
-            <a href="#ejemplos" style={styles.primaryBtn}>Ver ejemplos reales</a>
-            <a href="#acceso" style={styles.secondaryBtn}>Unirme a la lista de acceso</a>
+            <a href="#acceso" style={styles.primaryBtn}>Únete al acceso anticipado gratuito</a>
+            <a href="#ejemplos" style={styles.secondaryBtn}>Ver ejemplos reales</a>
           </div>
         </div>
       </section>
@@ -162,22 +206,66 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Final */}
+      {/* CTA Final Funcional */}
       <section id="acceso" style={styles.ctaSection}>
         <div style={styles.container}>
           <div style={styles.ctaBox}>
+            <div style={styles.badge}>🚀 Cupos limitados para la beta</div>
             <h2 style={styles.ctaTitle}>Recibe el Radar diario antes de operar</h2>
             <p style={styles.ctaText}>
-              Únete al acceso anticipado de Radar30s y obtén lecturas limpias de hechos, rumores y niveles técnicos.
+              Elige dónde quieres recibir tu resumen de 30 segundos cada mañana. Sin spam, 100% gratis durante el acceso anticipado.
             </p>
-            <div style={styles.ctaForm}>
+
+            {/* Selector de canal */}
+            <div style={styles.channelTabs}>
+              {[
+                { id: 'correo', label: '✉️ Correo' },
+                { id: 'whatsapp', label: '💬 WhatsApp' },
+                { id: 'telegram', label: '✈️ Telegram' },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setCanal(item.id);
+                    setEstado('idle');
+                  }}
+                  style={canal === item.id ? styles.tabActive : styles.tabInactive}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            <form onSubmit={handleSubmit} style={styles.ctaForm}>
               <input
-                type="email"
-                placeholder="tu@correo.com"
+                type={canal === 'correo' ? 'email' : 'text'}
+                required
+                value={contacto}
+                onChange={(e) => setContacto(e.target.value)}
+                placeholder={placeholders[canal]}
                 style={styles.input}
               />
-              <button style={styles.primaryBtn}>Solicitar acceso</button>
-            </div>
+              <button
+                type="submit"
+                disabled={estado === 'loading'}
+                style={styles.primaryBtn}
+              >
+                {estado === 'loading' ? 'Registrando...' : 'Únete al acceso anticipado gratuito'}
+              </button>
+            </form>
+
+            {estado === 'success' && (
+              <p style={styles.successMsg}>
+                ✅ ¡Listo! Ya quedaste dentro de la lista de acceso anticipado de Radar30s.
+              </p>
+            )}
+
+            {estado === 'error' && (
+              <p style={styles.errorMsg}>
+                ⚠️ No se pudo enviar el registro. Verifica tu conexión o el enlace de Formspree.
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -467,6 +555,34 @@ const styles = {
     color: '#94a3b8',
     maxWidth: '540px',
     margin: '0 auto 24px',
+    lineHeight: 1.5,
+  },
+  channelTabs: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '10px',
+    marginBottom: '18px',
+    flexWrap: 'wrap',
+  },
+  tabActive: {
+    backgroundColor: 'rgba(16, 185, 129, 0.18)',
+    color: '#34d399',
+    border: '1px solid #10b981',
+    padding: '8px 16px',
+    borderRadius: '8px',
+    fontWeight: '700',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+  },
+  tabInactive: {
+    backgroundColor: '#090d16',
+    color: '#94a3b8',
+    border: '1px solid #334155',
+    padding: '8px 16px',
+    borderRadius: '8px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
   },
   ctaForm: {
     display: 'flex',
@@ -480,8 +596,20 @@ const styles = {
     border: '1px solid #334155',
     backgroundColor: '#090d16',
     color: '#f8fafc',
-    minWidth: '250px',
+    minWidth: '260px',
     fontSize: '1rem',
+  },
+  successMsg: {
+    color: '#34d399',
+    marginTop: '16px',
+    fontWeight: '600',
+    fontSize: '0.95rem',
+  },
+  errorMsg: {
+    color: '#f87171',
+    marginTop: '16px',
+    fontWeight: '600',
+    fontSize: '0.95rem',
   },
   footer: {
     borderTop: '1px solid #1e293b',
